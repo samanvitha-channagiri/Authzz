@@ -1,0 +1,78 @@
+const User=require('../models/userModel')
+const bcrypt=require('bcrypt');
+const { findUserByEmailOrUsername, createUser } = require('../services/authservices');
+const {hashPassword,comparePassword} = require('../utils/hashPassword');
+const generateTokens=require('../utils/authHandler');
+const ErrorHandler = require('../utils/errorHandler');
+
+exports.registerController=async (req,res,next)=>{
+        const {username,password,email}=req.body;
+        try{
+            //Service function to find data from email or username
+            const userExist=await findUserByEmailOrUsername(email,username)
+            if(userExist){
+             throw new ErrorHandler('User With Email of Username already exist',400);
+            }
+            //hash the password
+           const hashedPassword=await hashPassword(password)
+           //storing the data to db
+           
+           const savedData=await createUser({username,email,password:hashedPassword}) //storing the data, only if you want to show it in response
+//username email n stuff database jothe exact matchagbeku names, illandre send it like password:hashedPassword
+          res.status(201).json({
+            error:false,
+            data:savedData
+          })
+          
+        }catch(error){
+            next(error)
+        }
+}
+
+
+exports.loginController=async (req,res,next)=>{
+        const {username,password,email}=req.body;
+        try{
+            //Service function to find data from email or username
+            const user=await findUserByEmailOrUsername(email,username)
+            if(!user){
+               throw new ErrorHandler('Username of Email does not exist',401)
+            }
+           
+            
+           const correctPassword=await comparePassword(password,user.password) 
+           //console.log(correctPassword);
+           
+         
+           if(!correctPassword){
+          throw new ErrorHandler('Password does not match',401)
+           }
+          
+           const {token,refreshToken}=await generateTokens(user)
+
+           user.refreshToken=refreshToken
+           await user.save()
+             
+           res.cookie('accessToken',token,{
+            httpOnly:true,
+            secure:true
+           })
+           res.cookie('refreshToken',refreshToken,{
+            httpOnly:true,
+            secure:true
+           })
+
+
+           console.log(user,correctPassword,token);
+          res.status(201).json({
+            error:false,
+            data:user,
+            accessToken:token,
+            refreshToken:refreshToken
+         
+          })
+          
+        }catch(error){
+            next(error)//yov middleware ig 4 args irutto, express recognizes it as the error handling middleware
+        }
+}
