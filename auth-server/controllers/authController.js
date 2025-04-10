@@ -8,12 +8,11 @@ const {
 const { hashPassword, comparePassword } = require("../utils/hashPassword");
 const generateTokens = require("../utils/authHandler");
 const ErrorHandler = require("../utils/errorHandler");
-
 const { isFieldErrorFree } = require("../utils/isFieldErrorFree");
-exports.registerController = async (req, res, next) => {
 
+exports.registerController = async (req, res, next) => {
   //data sanitization against site script XSS and validate
-     await isFieldErrorFree(req,res);
+  await isFieldErrorFree(req, res);
   const { username, password, email } = req.body;
   try {
     //Service function to find data from email or username
@@ -25,7 +24,6 @@ exports.registerController = async (req, res, next) => {
     const hashedPassword = await hashPassword(password);
     //storing the data to db
 
-  
     const savedData = await createUserOrUpdate({
       username,
       email,
@@ -33,7 +31,7 @@ exports.registerController = async (req, res, next) => {
     });
     //sending Mail
     const verificationOTP = await sendVerificationMail(savedData);
-    
+
     //Updating the otp in the existing user
     const updatedData = await createUserOrUpdate(
       {
@@ -41,10 +39,6 @@ exports.registerController = async (req, res, next) => {
       },
       savedData
     );
-
-
-
-  
 
     res.status(201).json({
       error: false,

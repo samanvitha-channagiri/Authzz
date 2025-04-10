@@ -1,8 +1,9 @@
 const {transporter}=require("../utils/mailHandler")
-
+const {generateOTP}=require('../utils/generateOtp')
 
 async function sendVerificationMail(user){
-    let verificationOTP=123456
+    //use await because, once you get the otp then only you'll send that
+    let verificationOTP=await generateOTP() 
 //send verification mail
 const verificationLink=`http://localhost:5173/verify-otp?userid=${user._id}`
 
