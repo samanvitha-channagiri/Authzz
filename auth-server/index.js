@@ -1,3 +1,4 @@
+require('dotenv').config()//always dotenv should be at the top, then only all the files will get the access
 const express = require("express");
 const app = express();
 const { authRoutes } = require("./routes");

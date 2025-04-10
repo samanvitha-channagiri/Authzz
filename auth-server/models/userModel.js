@@ -7,7 +7,7 @@ const userSchema=new Schema({
      type:String,
      required:true,
      unique:true,
-     match:/^[a-zA-Z0-0]+$/,
+    //  match:/^[a-zA-Z0-0]+$/,
 
     },
     email:{
