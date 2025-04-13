@@ -1,8 +1,22 @@
 const User=require('../models/userModel')
 
-async function findUserByEmailOrUsername(email,username){
-  return  await User.findOne({$or:[{email},{username}]})
-
+async function findUser({id,email,username},selectedField=false){
+  const query={};
+  if(id) query._id=id
+  if(email) query.email=email
+  if(username) query.username=username
+  //use $or operator to allow finding by id, email or username
+  const userQuery=   User.findOne({
+    $or:[
+      id?{_id:id}:null,
+      email?{email}:null,
+      username?{username}:null,
+  ].filter(Boolean),
+});
+if(selectedField){
+  userQuery.select(`${selectedField.join(' ')}`)
+}
+return await userQuery;
 }
 async function createUserOrUpdate(userData,updateUser){
   //in case of update dynamic keys
@@ -12,17 +26,15 @@ async function createUserOrUpdate(userData,updateUser){
      // updateUser is already a Mongoose document since it's been fetched/created before.
       for(let key in userData){
         updateUser[key]=userData[key];
-
       }
       return updateUser.save();
   }
     // Otherwise, create a new Mongoose document using userData.
     const data= new User(userData)
-   
    return await data.save()
 }
 module.exports={
-    findUserByEmailOrUsername,createUserOrUpdate
+    findUser,createUserOrUpdate
 }
 
 
