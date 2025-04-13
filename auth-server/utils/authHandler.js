@@ -2,12 +2,12 @@ const jwt = require("jsonwebtoken");
 const generateTokens = async (user,secret) => {
   //Get the token
   let token = jwt.sign(
-    { data: { email: user?.email, id: user?.id } },
+    { data: { email: user?.email, id: user?.id ,role:user.role} },
     secret,
     { expiresIn: 60 * 60 }
   );
   let refreshToken = jwt.sign(
-    { data: { email: user?.email, id: user?.id } },
+    { data: { email: user?.email, id: user?.id ,role:user.role} },
     secret,
     { expiresIn: "7d" }
   );

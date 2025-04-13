@@ -1,12 +1,15 @@
 const User=require('../models/userModel')
 
+async function getAllUser(){
+  return await User.find();
+}
 async function findUser({id,email,username},selectedField=false){
   const query={};
   if(id) query._id=id
   if(email) query.email=email
   if(username) query.username=username
   //use $or operator to allow finding by id, email or username
-  const userQuery=   User.findOne({
+  const userQuery= User.findOne({
     $or:[
       id?{_id:id}:null,
       email?{email}:null,
@@ -34,7 +37,7 @@ async function createUserOrUpdate(userData,updateUser){
    return await data.save()
 }
 module.exports={
-    findUser,createUserOrUpdate
+    findUser,createUserOrUpdate,getAllUser
 }
 
 

@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const { sendVerificationMail, sendForgetPasswordLink } = require("../services/mailServices");
-const { findUser, createUserOrUpdate } = require("../services/authservices");
+const { findUser, createUserOrUpdate,getAllUser } = require("../services/authservices");
 const { hashPassword, comparePassword } = require("../utils/hashPassword");
 const {
   generateTokens,
@@ -9,6 +9,22 @@ const {
 } = require("../utils/authHandler");
 const ErrorHandler = require("../utils/errorHandler");
 const { isFieldErrorFree } = require("../utils/isFieldErrorFree");
+const { generateOTP } = require("../utils/generateOtp");
+
+
+//get all users
+exports.getAllUser = async (req, res, next) => {
+  try {
+    const users = await getAllUser({});
+    //if user does not exist
+    res.status(200).json({
+      message: "User fetched success",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.getUserByIdController = async (req, res, next) => {
   //extracting the id
@@ -36,7 +52,7 @@ exports.getUserByIdController = async (req, res, next) => {
 exports.registerController = async (req, res, next) => {
   //data sanitization against site script XSS and validate
   await isFieldErrorFree(req, res);
-  const { username, password, email } = req.body;
+  const { username, password, email ,role,phone} = req.body;
   try {
     //Service function to find data from email or username
     const userExist = await findUser({ email, username });
@@ -50,6 +66,7 @@ exports.registerController = async (req, res, next) => {
       username,
       email,
       password: hashedPassword,
+      role:role
     });
     //sending Mail
     const verificationOTP = await sendVerificationMail(savedData);
@@ -282,3 +299,20 @@ exports.logoutController=async(req,res,next)=>{
   }
 
 }
+/*
+exports.sendOtpController=async(req,res,next)=>{
+ const {phone}=req.body;
+ const otp=generateOTP();
+ try{
+     const user=findUser({phone})
+
+ }catch(error){
+
+ }
+}
+exports.verifyOtpController=async(req,res,next)=>{
+  
+}
+
+
+*/
